@@ -35,7 +35,7 @@ os.makedirs("output", exist_ok=True)
 from trendspyg import download_google_trends_rss
 
 def get_trending_topic():
-    print("\n📈 [1/6] Finding trending topics...")
+    print("\n[1/6] Finding trending topics...")
     try:
         # Get trending searches using trendspyg (maintained & working)
         env = download_google_trends_rss(geo='US', normalize=True)
@@ -64,18 +64,18 @@ def get_trending_topic():
         lines = response.text.strip().split('\n')
         topic = lines[0].replace("TOPIC:", "").strip()
         angle = lines[1].replace("ANGLE:", "").strip() if len(lines) > 1 else "Trending now"
-        print(f"   ✅ Topic chosen: {topic}")
-        print(f"   ✅ Angle: {angle}")
+        print(f" Topic chosen: {topic}")
+        print(f" Angle: {angle}")
         return topic, angle
 
     except Exception as e:
-        print(f"   ⚠️ Trends error: {e} — Using fallback topic")
+        print(f"  Trends error: {e} — Using fallback topic")
         return f"Top {NICHE} tips 2026", f"Essential {NICHE} advice everyone needs"
 # ═════════════════════════════════════════════════════════
 # STEP B: WRITE ALL CONTENT WITH AI
 # ═════════════════════════════════════════════════════════
 def generate_content(topic, angle):
-    print("\n✍️  [2/6] Writing content with AI...")
+    print("\n [2/6] Writing content with AI...")
     prompt = f"""
     Create a complete Instagram Reel package about: "{topic}"
     Angle: {angle}
@@ -114,8 +114,8 @@ def generate_content(topic, angle):
     hashtags = extract("HASHTAGS:", "KEYWORDS:")
     keywords = extract("KEYWORDS:", "ZZZZ")      # last item
 
-    print(f"   ✅ Script written ({len(script.split())} words)")
-    print(f"   ✅ Caption & {len(hashtags.split())} hashtags ready")
+    print(f" Script written ({len(script.split())} words)")
+    print(f" Caption & {len(hashtags.split())} hashtags ready")
     return script, caption, hashtags, keywords
 
 
@@ -123,7 +123,7 @@ def generate_content(topic, angle):
 # STEP C: DOWNLOAD FREE STOCK VIDEOS (Pexels)
 # ═════════════════════════════════════════════════════════
 def download_stock_videos(keywords, num_clips=4):
-    print("\n🎬 [3/6] Downloading free stock videos from Pexels...")
+    print("\n [3/6] Downloading free stock videos from Pexels...")
     keyword_list = [k.strip() for k in keywords.split(",")]
     clip_paths   = []
     headers      = {"Authorization": PEXELS_KEY}
@@ -148,7 +148,7 @@ def download_stock_videos(keywords, num_clips=4):
                     for chunk in r.iter_content(chunk_size=8192):
                         f.write(chunk)
             clip_paths.append(filename)
-            print(f"   ✅ Downloaded: {filename}")
+            print(f" Downloaded: {filename}")
 
             if len(clip_paths) >= num_clips:
                 break
@@ -158,23 +158,20 @@ def download_stock_videos(keywords, num_clips=4):
     return clip_paths
 
 
-# ═════════════════════════════════════════════════════════
 # STEP D: CREATE VOICEOVER (Free Google TTS)
-# ═════════════════════════════════════════════════════════
 def create_voiceover(script):
-    print("\n🎙️  [4/6] Generating AI voiceover...")
+    print("\n  [4/6] Generating AI voiceover...")
     audio_path = "audio/voiceover.mp3"
     tts        = gTTS(text=script, lang='hi', slow=False)
     tts.save(audio_path)
-    print(f"   ✅ Voiceover saved!")
+    print(f"    Voiceover saved!")
     return audio_path
 
 
-# ═════════════════════════════════════════════════════════
 # STEP E: BUILD THE ANIMATED VIDEO
 # ═════════════════════════════════════════════════════════
 def build_video(clip_paths, audio_path, script, topic):
-    print("\n🎞️  [5/6] Building the animated video...")
+    print("\n  [5/6] Building the animated video...")
 
     # Instagram Reels dimensions (vertical 9:16)
     W, H         = 1080, 1920
@@ -202,7 +199,7 @@ def build_video(clip_paths, audio_path, script, topic):
             vc         = vc.fl_image(lambda f: (f * 0.55).astype('uint8'))
             processed.append(vc)
         except Exception as e:
-            print(f"   ⚠️ Skipping clip {path}: {e}")
+            print(f"  Skipping clip {path}: {e}")
 
     if not processed:
         # Fallback: solid color background
@@ -275,7 +272,7 @@ def build_video(clip_paths, audio_path, script, topic):
         verbose=False,
         logger=None
     )
-    print(f"   ✅ Video created: {output_path}")
+    print(f"   Video created: {output_path}")
 
     # Cleanup temp clips
     for p in clip_paths:
@@ -287,11 +284,10 @@ def build_video(clip_paths, audio_path, script, topic):
     return output_path
 
 
-# ═════════════════════════════════════════════════════════
 # STEP F: AUTO-UPLOAD TO INSTAGRAM
 # ═════════════════════════════════════════════════════════
 def upload_to_instagram(video_path, caption, hashtags):
-    print("\n📤 [6/6] Uploading to Instagram...")
+    print("\n[6/6] Uploading to Instagram...")
     full_caption = f"{caption}\n\n.\n.\n.\n{hashtags}"
 
     cl = Client()
@@ -299,9 +295,9 @@ def upload_to_instagram(video_path, caption, hashtags):
 
     try:
         cl.login(IG_USER, IG_PASS)
-        print("   ✅ Logged in to Instagram!")
+        print("  Logged in to Instagram!")
     except Exception as e:
-        print(f"   ❌ Login failed: {e}")
+        print(f"  Login failed: {e}")
         return False
 
     try:
@@ -309,22 +305,22 @@ def upload_to_instagram(video_path, caption, hashtags):
             path=video_path,
             caption=full_caption
         )
-        print(f"   ✅ REEL POSTED SUCCESSFULLY! 🎉")
-        print(f"   📊 Media ID: {media.pk}")
+        print(f"   REEL POSTED SUCCESSFULLY! 🎉")
+        print(f"    Media ID: {media.pk}")
         cl.logout()
         return True
     except Exception as e:
-        print(f"   ❌ Upload error: {e}")
+        print(f"    Upload error: {e}")
         cl.logout()
         return False
 
 
-# ═════════════════════════════════════════════════════════
-# 🚀 MASTER FUNCTION — DOES EVERYTHING IN ONE SHOT
+
+# MASTER FUNCTION — DOES EVERYTHING IN ONE SHOT
 # ═════════════════════════════════════════════════════════
 def run_full_automation():
     print("\n" + "═"*55)
-    print(f"  🤖 INSTAGRAM AI BOT STARTED — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"  INSTAGRAM AI BOT STARTED — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("═"*55)
 
     try:
@@ -347,28 +343,27 @@ def run_full_automation():
         success = upload_to_instagram(video_path, caption, hashtags)
 
         if success:
-            print("\n🎉 SUCCESS! Your Instagram Reel was posted automatically!")
+            print("\nSUCCESS! Your Instagram Reel was posted automatically!")
         else:
-            print("\n⚠️ Video was created but upload failed. Check credentials.")
+            print("\nVideo was created but upload failed. Check credentials.")
 
     except Exception as e:
-        print(f"\n❌ Bot error: {e}")
+        print(f"\nBot error: {e}")
         import traceback; traceback.print_exc()
 
-    print("\n⏰ Next post scheduled at:", POST_TIME, "tomorrow")
+    print("\nNext post scheduled at:", POST_TIME, "tomorrow")
     print("═"*55)
 
 
-# ═════════════════════════════════════════════════════════
-# ⏰ SCHEDULER — Runs daily automatically
+#SCHEDULER — Runs daily automatically
 # ═════════════════════════════════════════════════════════
 if __name__ == "__main__":
     print(f"""
-╔══════════════════════════════════════════╗
-║   🤖 INSTAGRAM AI BOT — ONE-CLICK MODE  ║
-║   Niche   : {NICHE:<30}║
-║   Posts at: {POST_TIME} daily                      ║
-╚══════════════════════════════════════════╝
+
+    INSTAGRAM AI BOT — ONE-CLICK MODE  
+    Niche   : {NICHE:<30}║
+    Posts at: {POST_TIME} daily                      
+
     """)
 
     # Run immediately right now
@@ -376,9 +371,9 @@ if __name__ == "__main__":
 
     # Then schedule daily
     schedule.every().day.at(POST_TIME).do(run_full_automation)
-    print(f"\n✅ Bot is now running in the background...")
-    print(f"📅 Will post every day at {POST_TIME} automatically.")
-    print("🔴 Keep this terminal open (or host it — see below)\n")
+    print(f"\n Bot is now running in the background...")
+    print(f" Will post every day at {POST_TIME} automatically.")
+    print(" Keep this terminal open (or host it — see below)\n")
 
     while True:
         schedule.run_pending()
